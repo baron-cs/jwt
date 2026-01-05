@@ -1,5 +1,5 @@
-&lt;!-- README.md - Universal Token Decoder & Editor --&gt;
-&lt;!-- 🇩🇿 Proudly Algerian - Built with passion --&gt;
+&lt;!-- Universal Token Decoder & Editor - Complete README --&gt;
+&lt;!-- 🇩🇿 Proudly Algerian --&gt;
 
 &lt;div align="center"&gt;
 
@@ -7,29 +7,23 @@
 
 ### **Decode • Analyze • Edit • Secure**
 
-[![Algeria](https://img.shields.io/badge/Made%20in-Algeria%20🇩🇿-red?style=flat-square)](https://en.wikipedia.org/wiki/Algeria)
-[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+[![Algeria](https://img.shields.io/badge/Made%20in-Algeria%20🇩🇿-green?style=flat-square)](https://en.wikipedia.org/wiki/Algeria)
+[![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
 [![HTML](https://img.shields.io/badge/HTML-100%25-orange?style=flat-square)](https://developer.mozilla.org/en-US/docs/Web/HTML)
-[![CSS](https://img.shields.io/badge/CSS-Modern-blue?style=flat-square)](https://developer.mozilla.org/en-US/docs/Web/CSS)
+[![CSS](https://img.shields.io/badge/CSS-Modern-purple?style=flat-square)](https://developer.mozilla.org/en-US/docs/Web/CSS)
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow?style=flat-square)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 
 &lt;/div&gt;
 
 ---
 
-&lt;div align="center"&gt;
-
-## 🌟 **Features That Set Us Apart**
-
-&lt;/div&gt;
-
-&lt;br&gt;
+## 🌟 Features
 
 &lt;div align="center"&gt;
 &lt;table&gt;
   &lt;tr&gt;
     &lt;td width="50%" valign="top"&gt;
-      &lt;h3&gt;🔍 &lt;b&gt;Multi-Format Mastery&lt;/b&gt;&lt;/h3&gt;
+      &lt;h3&gt;🔍 Multi-Format Support&lt;/h3&gt;
       &lt;ul&gt;
         &lt;li&gt;🎯 &lt;strong&gt;JWT Tokens&lt;/strong&gt; - Full payload analysis&lt;/li&gt;
         &lt;li&gt;🔄 &lt;strong&gt;Base64/Base64Url&lt;/strong&gt; - Perfect encoding/decoding&lt;/li&gt;
@@ -39,7 +33,7 @@
       &lt;/ul&gt;
     &lt;/td&gt;
     &lt;td width="50%" valign="top"&gt;
-      &lt;h3&gt;⚡ &lt;b&gt;Real-Time Power&lt;/b&gt;&lt;/h3&gt;
+      &lt;h3&gt;⚡ Real-Time Power&lt;/h3&gt;
       &lt;ul&gt;
         &lt;li&gt;⚡ &lt;strong&gt;Live Editing&lt;/strong&gt; - Modify tokens on-the-fly&lt;/li&gt;
         &lt;li&gt;🔄 &lt;strong&gt;Instant Encoding&lt;/strong&gt; - Changes sync automatically&lt;/li&gt;
@@ -52,11 +46,9 @@
 &lt;/table&gt;
 &lt;/div&gt;
 
-&lt;br&gt;
-
 ---
 
-## 🎯 **Perfect For**
+## 🎯 Perfect For
 
 &lt;div align="center"&gt;
 
@@ -70,13 +62,15 @@
 
 ---
 
-## 🚀 **Lightning Fast Setup**
+## 🚀 Quick Start
 
-### **Option 1: Direct Usage**
+### Option 1: Direct Usage
 ```bash
-# 1. Clone the repository
+# Clone the repository
 git clone https://github.com/YOUR_USERNAME/universal-token-decoder.git
 
-# 2. Open index.html in your browser
+# Navigate to directory
 cd universal-token-decoder
+
+# Open in browser
 open index.html
