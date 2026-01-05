@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Token Decoder & Editor</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .input-section {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .format-selector {
+            margin: 15px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .format-btn {
+            padding: 8px 16px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .format-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .format-btn:hover:not(.active) {
+            border-color: #667eea;
+            background: #f0f3ff;
+        }
+        
+        .button-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .decode-btn {
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .decode-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .encode-btn {
+            background: linear-gradient(to right, #4CAF50, #45a049);
+            color: white;
+        }
+        
+        .encode-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+        
+        .clear-btn {
+            background: #f8f9fa;
+            color: #495057;
+            border: 1px solid #ddd;
+        }
+        
+        .clear-btn:hover {
+            background: #e9ecef;
+        }
+        
+        .edit-btn {
+            background: linear-gradient(to right, #FF9800, #F57C00);
+            color: white;
+        }
+        
+        .edit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
+        }
+        
+        .results-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .result-box {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .result-header {
+            background: linear-gradient(to right, #f5f7fa, #c3cfe2);
+            padding: 15px;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .result-content {
+            padding: 15px;
+            background: #f9f9f9;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            min-height: 150px;
+            max-height: 400px;
+            overflow-y: auto;
+            word-break: break-all;
+        }
+        
+        .editable {
+            background: #fffde7 !important;
+            border: 2px dashed #FF9800;
+            cursor: text;
+        }
+        
+        .error-message {
+            color: #d32f2f;
+            background: #ffebee;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+            border-left: 4px solid #f44336;
+            display: none;
+        }
+        
+        .success-message {
+            color: #388e3c;
+            background: #e8f5e9;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+            border-left: 4px solid #4caf50;
+            display: none;
+        }
+        
+        .detected-format {
+            background: #e3f2fd;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .analysis-panel {
+            background: #fff8e1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #ffb300;
+        }
+        
+        .analysis-item {
+            margin: 8px 0;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .analysis-label {
+            font-weight: 600;
+            min-width: 120px;
+            color: #5d4037;
+        }
+        
+        .token-info {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 14px;
+            word-break: break-all;
+        }
+        
+        .edit-controls {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f7ff;
+            border-radius: 8px;
+            border: 2px solid #e3f2fd;
+            display: none;
+        }
+        
+        .edit-controls h3 {
+            margin-top: 0;
+            color: #1976d2;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .copy-btn {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        
+        .copy-btn:hover {
+            background: #1976d2;
+        }
+        
+        .encoded-result {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 2px solid #4CAF50;
+            font-family: monospace;
+            font-size: 14px;
+            word-break: break-all;
+            display: none;
+        }
+        
+        .encoded-result h3 {
+            margin-top: 0;
+            color: #2e7d32;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .results-section {
+                grid-template-columns: 1fr;
+            }
+            
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Universal Token Decoder & Editor</h1>
+        
+        <div class="input-section">
+            <label for="tokenInput">Enter any token or encoded string:</label>
+            <textarea id="tokenInput" placeholder="Paste any token here (JWT, Base64, Hex, Session tokens, etc.)..."></textarea>
+            
+            <div class="format-selector">
+                <span style="font-weight: 600;">Try decoding as:</span>
+                <button class="format-btn active" onclick="setFormat('auto')">🔄 Auto-detect</button>
+                <button class="format-btn" onclick="setFormat('jwt')">JWT</button>
+                <button class="format-btn" onclick="setFormat('base64')">Base64</button>
+                <button class="format-btn" onclick="setFormat('base64url')">Base64Url</button>
+                <button class="format-btn" onclick="setFormat('hex')">Hex</button>
+                <button class="format-btn" onclick="setFormat('utf8')">UTF-8 Text</button>
+            </div>
+            
+            <div class="detected-format" id="detectedFormat">
+                Format will be auto-detected...
+            </div>
+            
+            <div class="button-container">
+                <button class="decode-btn" onclick="decodeToken()">🔍 Decode & Analyze</button>
+                <button class="edit-btn" onclick="enableEditing()">✏️ Edit Decoded Text</button>
+                <button class="encode-btn" onclick="encodeBack()">🔄 Encode Back</button>
+                <button class="clear-btn" onclick="clearAll()">🗑️ Clear All</button>
+            </div>
+        </div>
+        
+        <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message"></div>
+        
+        <div class="edit-controls" id="editControls">
+            <h3>✏️ Edit Mode Active</h3>
+            <p>You can now edit the decoded text in the boxes below. After editing, click "Encode Back" to convert it back to the original format.</p>
+        </div>
+        
+        <div class="encoded-result" id="encodedResult">
+            <h3>📝 Encoded Result:</h3>
+            <div id="encodedOutput"></div>
+            <button class="copy-btn" onclick="copyToClipboard('encodedOutput')">📋 Copy</button>
+        </div>
+        
+        <div class="analysis-panel" id="analysisPanel" style="display: none;">
+            <div style="font-weight: bold; margin-bottom: 10px;">📊 Token Analysis:</div>
+            <div id="analysisContent"></div>
+        </div>
+        
+        <div class="results-section">
+            <div class="result-box">
+                <div class="result-header">
+                    Decoded as Text
+                    <button class="copy-btn" onclick="copyToClipboard('outputText')">📋 Copy</button>
+                </div>
+                <div class="result-content" id="outputText" contenteditable="false" oninput="onEdit()">
+                    Text output will appear here...
+                </div>
+            </div>
+            
+            <div class="result-box">
+                <div class="result-header">
+                    Decoded as Bytes (Hex)
+                    <button class="copy-btn" onclick="copyToClipboard('outputHex')">📋 Copy</button>
+                </div>
+                <div class="result-content" id="outputHex" contenteditable="false" oninput="onEdit()">
+                    Hex output will appear here...
+                </div>
+            </div>
+            
+            <div class="result-box">
+                <div class="result-header">
+                    Raw Analysis
+                    <button class="copy-btn" onclick="copyToClipboard('outputRaw')">📋 Copy</button>
+                </div>
+                <div class="result-content" id="outputRaw">
+                    Raw analysis will appear here...
+                </div>
+            </div>
+        </div>
+        
+        <div class="token-info" id="tokenInfo" style="display: none;">
+            <div style="font-weight: bold; margin-bottom: 8px;">📝 Original Token:</div>
+            <div id="originalToken"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentFormat = 'auto';
+        let isEditingMode = false;
+        let originalDecodedData = {
+            text: '',
+            hex: '',
+            format: ''
+        };
+        let currentToken = '';
+        
+        function setFormat(format) {
+            currentFormat = format;
+            
+            document.querySelectorAll('.format-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            const formatNames = {
+                'auto': '🔄 Auto-detect',
+                'jwt': 'JWT Token',
+                'base64': 'Base64',
+                'base64url': 'Base64Url',
+                'hex': 'Hexadecimal',
+                'utf8': 'UTF-8 Text'
+            };
+            
+            document.getElementById('detectedFormat').innerHTML = 
+                `<strong>Selected format:</strong> ${formatNames[format]}`;
+        }
+        
+        function detectFormat(token) {
+            if (token.split('.').length === 3) {
+                const parts = token.split('.');
+                const jwtRegex = /^[A-Za-z0-9_-]+$/;
+                if (parts.every(part => jwtRegex.test(part))) {
+                    return 'jwt';
+                }
+            }
+            
+            const hexRegex = /^[0-9a-fA-F]+$/;
+            if (hexRegex.test(token)) {
+                return 'hex';
+            }
+            
+            const base64Regex = /^[A-Za-z0-9+/]+=*$/;
+            const base64UrlRegex = /^[A-Za-z0-9_-]+$/;
+            
+            try {
+                atob(token.replace(/-/g, '+').replace(/_/g, '/'));
+                if (base64UrlRegex.test(token) && token.includes('_')) {
+                    return 'base64url';
+                }
+                return 'base64';
+            } catch (e) {}
+            
+            return 'utf8';
+        }
+        
+        function decodeBase64(base64Str) {
+            try {
+                let base64 = base64Str.replace(/-/g, '+').replace(/_/g, '/');
+                while (base64.length % 4) {
+                    base64 += '=';
+                }
+                return atob(base64);
+            } catch (e) {
+                throw new Error('Invalid Base64 encoding');
+            }
+        }
+        
+        function encodeBase64(str) {
+            return btoa(str);
+        }
+        
+        function encodeBase64Url(str) {
+            return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+        
+        function hexToString(hex) {
+            let str = '';
+            for (let i = 0; i < hex.length; i += 2) {
+                str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+            }
+            return str;
+        }
+        
+        function stringToHex(str) {
+            let hex = '';
+            for (let i = 0; i < str.length; i++) {
+                hex += str.charCodeAt(i).toString(16).padStart(2, '0');
+            }
+            return hex;
+        }
+        
+        function decodeJWT(token) {
+            const parts = token.split('.');
+            if (parts.length !== 3) {
+                throw new Error('Invalid JWT: Must have 3 parts');
+            }
+            
+            try {
+                const header = decodeBase64(parts[0]);
+                const payload = decodeBase64(parts[1]);
+                const signature = parts[2];
+                
+                return {
+                    header: JSON.parse(header),
+                    payload: JSON.parse(payload),
+                    signature: signature,
+                    raw: { header: header, payload: header, signature: signature }
+                };
+            } catch (e) {
+                throw new Error('Invalid JWT format: ' + e.message);
+            }
+        }
+        
+        function encodeJWT(header, payload, signature) {
+            try {
+                const encodedHeader = encodeBase64Url(JSON.stringify(header));
+                const encodedPayload = encodeBase64Url(JSON.stringify(payload));
+                return `${encodedHeader}.${encodedPayload}.${signature}`;
+            } catch (e) {
+                throw new Error('Invalid JWT data: ' + e.message);
+            }
+        }
+        
+        function analyzeToken(token, format) {
+            const analysis = {
+                length: token.length,
+                charSet: new Set(token.split('')).size,
+                format: format,
+                isPrintable: /^[\x20-\x7E]*$/.test(token),
+                hasSpecialChars: /[^A-Za-z0-9+/=._-]/.test(token),
+                commonPatterns: []
+            };
+            
+            if (token.includes('.')) analysis.commonPatterns.push('Contains dots');
+            if (token.includes('-')) analysis.commonPatterns.push('Contains dashes');
+            if (token.includes('_')) analysis.commonPatterns.push('Contains underscores');
+            if (token.includes('+') || token.includes('/') || token.includes('=')) {
+                analysis.commonPatterns.push('Looks like Base64');
+            }
+            
+            if (format === 'jwt') {
+                analysis.guess = 'JSON Web Token (JWT)';
+            } else if (format === 'base64' || format === 'base64url') {
+                const decoded = format === 'base64url' ? 
+                    decodeBase64(token.replace(/-/g, '+').replace(/_/g, '/')) : 
+                    decodeBase64(token);
+                
+                analysis.decodedLength = decoded.length;
+                analysis.isBinary = !/^[\x20-\x7E\x0A\x0D\x09]*$/.test(decoded);
+                
+                if (decoded.startsWith('{') || decoded.startsWith('[')) {
+                    analysis.guess = 'Base64-encoded JSON';
+                } else if (analysis.isBinary) {
+                    analysis.guess = 'Binary data (encrypted/session token)';
+                } else {
+                    analysis.guess = 'Base64-encoded text';
+                }
+            } else if (format === 'hex') {
+                analysis.guess = 'Hexadecimal encoded data';
+            } else {
+                analysis.guess = 'Plain text or unknown format';
+            }
+            
+            return analysis;
+        }
+        
+        function enableEditing() {
+            isEditingMode = !isEditingMode;
+            const textBox = document.getElementById('outputText');
+            const hexBox = document.getElementById('outputHex');
+            const editControls = document.getElementById('editControls');
+            
+            if (isEditingMode) {
+                textBox.contentEditable = true;
+                hexBox.contentEditable = true;
+                textBox.classList.add('editable');
+                hexBox.classList.add('editable');
+                editControls.style.display = 'block';
+                editControls.innerHTML = `
+                    <h3>✏️ Edit Mode Active</h3>
+                    <p>You can now edit the decoded text in the boxes above. Changes to the text box will automatically update the hex box and vice versa.</p>
+                    <p><strong>Note:</strong> For JWT tokens, you need to edit the JSON structure directly in the text box.</p>
+                `;
+                showSuccess('Editing mode enabled. You can now edit the decoded content.');
+            } else {
+                textBox.contentEditable = false;
+                hexBox.contentEditable = false;
+                textBox.classList.remove('editable');
+                hexBox.classList.remove('editable');
+                editControls.style.display = 'none';
+                showSuccess('Editing mode disabled.');
+            }
+        }
+        
+        function onEdit() {
+            if (!isEditingMode) return;
+            
+            const textBox = document.getElementById('outputText');
+            const hexBox = document.getElementById('outputHex');
+            
+            // Check which box was edited
+            if (event.target.id === 'outputText') {
+                // Update hex from text
+                try {
+                    const text = textBox.textContent;
+                    hexBox.textContent = stringToHex(text);
+                } catch (e) {
+                    showError('Invalid text for hex conversion');
+                }
+            } else if (event.target.id === 'outputHex') {
+                // Update text from hex
+                try {
+                    const hex = hexBox.textContent.replace(/\s/g, '');
+                    if (hex.length % 2 === 0 && /^[0-9a-fA-F]+$/.test(hex)) {
+                        textBox.textContent = hexToString(hex);
+                    }
+                } catch (e) {
+                    showError('Invalid hex string');
+                }
+            }
+        }
+        
+        function encodeBack() {
+            if (!isEditingMode) {
+                showError('Please enable edit mode first by clicking "Edit Decoded Text"');
+                return;
+            }
+            
+            const textContent = document.getElementById('outputText').textContent;
+            const hexContent = document.getElementById('outputHex').textContent;
+            const format = originalDecodedData.format;
+            let encoded = '';
+            
+            try {
+                switch(format) {
+                    case 'jwt':
+                        try {
+                            // Try to parse as JWT and re-encode
+                            const lines = textContent.split('\n');
+                            let header = {}, payload = {}, signature = '';
+                            
+                            lines.forEach(line => {
+                                if (line.includes('HEADER:')) {
+                                    const headerStart = textContent.indexOf('HEADER:') + 'HEADER:'.length;
+                                    const payloadStart = textContent.indexOf('PAYLOAD:');
+                                    const headerStr = textContent.substring(headerStart, payloadStart).trim();
+                                    header = JSON.parse(headerStr);
+                                } else if (line.includes('PAYLOAD:')) {
+                                    const payloadStart = textContent.indexOf('PAYLOAD:') + 'PAYLOAD:'.length;
+                                    const signatureStart = textContent.indexOf('SIGNATURE:');
+                                    const payloadStr = textContent.substring(payloadStart, signatureStart).trim();
+                                    payload = JSON.parse(payloadStr);
+                                } else if (line.includes('SIGNATURE:')) {
+                                    const signatureStart = textContent.indexOf('SIGNATURE:') + 'SIGNATURE:'.length;
+                                    signature = textContent.substring(signatureStart).trim();
+                                }
+                            });
+                            
+                            encoded = encodeJWT(header, payload, signature);
+                        } catch (e) {
+                            // If not JWT, encode as base64
+                            encoded = encodeBase64(textContent);
+                        }
+                        break;
+                        
+                    case 'base64':
+                        encoded = encodeBase64(textContent);
+                        break;
+                        
+                    case 'base64url':
+                        encoded = encodeBase64Url(textContent);
+                        break;
+                        
+                    case 'hex':
+                        encoded = hexContent.replace(/\s/g, '').toLowerCase();
+                        break;
+                        
+                    case 'utf8':
+                        encoded = textContent;
+                        break;
+                        
+                    default:
+                        encoded = textContent;
+                }
+                
+                // Show the encoded result
+                document.getElementById('encodedOutput').textContent = encoded;
+                document.getElementById('encodedResult').style.display = 'block';
+                showSuccess('Successfully encoded back to original format!');
+                
+            } catch (error) {
+                showError('Encoding failed: ' + error.message);
+            }
+        }
+        
+        function decodeToken() {
+            const tokenInput = document.getElementById('tokenInput').value.trim();
+            const errorElement = document.getElementById('errorMessage');
+            const successElement = document.getElementById('successMessage');
+            
+            errorElement.style.display = 'none';
+            successElement.style.display = 'none';
+            document.getElementById('analysisPanel').style.display = 'none';
+            document.getElementById('tokenInfo').style.display = 'none';
+            document.getElementById('encodedResult').style.display = 'none';
+            
+            if (!tokenInput) {
+                showError('❌ Please enter a token to decode');
+                return;
+            }
+            
+            try {
+                currentToken = tokenInput;
+                const formatToUse = currentFormat === 'auto' ? detectFormat(tokenInput) : currentFormat;
+                let decodedText = '';
+                let decodedHex = '';
+                
+                document.getElementById('detectedFormat').innerHTML = 
+                    `<strong>Detected format:</strong> ${formatToUse.toUpperCase()}`;
+                
+                originalDecodedData.format = formatToUse;
+                
+                switch(formatToUse) {
+                    case 'jwt':
+                        try {
+                            const jwt = decodeJWT(tokenInput);
+                            decodedText = `HEADER:\n${JSON.stringify(jwt.header, null, 2)}\n\nPAYLOAD:\n${JSON.stringify(jwt.payload, null, 2)}\n\nSIGNATURE:\n${jwt.signature}`;
+                            decodedHex = `Header Hex: ${stringToHex(JSON.stringify(jwt.header))}\n\nPayload Hex: ${stringToHex(JSON.stringify(jwt.payload))}\n\nSignature: ${jwt.signature}`;
+                            originalDecodedData.text = decodedText;
+                            originalDecodedData.hex = decodedHex;
+                        } catch (e) {
+                            decodedText = decodeBase64(tokenInput);
+                            decodedHex = stringToHex(decodedText);
+                            originalDecodedData.text = decodedText;
+                            originalDecodedData.hex = decodedHex;
+                        }
+                        break;
+                        
+                    case 'base64':
+                    case 'base64url':
+                        decodedText = decodeBase64(tokenInput);
+                        decodedHex = stringToHex(decodedText);
+                        originalDecodedData.text = decodedText;
+                        originalDecodedData.hex = decodedHex;
+                        break;
+                        
+                    case 'hex':
+                        decodedText = hexToString(tokenInput);
+                        decodedHex = tokenInput;
+                        originalDecodedData.text = decodedText;
+                        originalDecodedData.hex = decodedHex;
+                        break;
+                        
+                    case 'utf8':
+                        decodedText = tokenInput;
+                        decodedHex = stringToHex(tokenInput);
+                        originalDecodedData.text = decodedText;
+                        originalDecodedData.hex = decodedHex;
+                        break;
+                }
+                
+                document.getElementById('outputText').textContent = decodedText || '(Empty or binary data)';
+                document.getElementById('outputHex').textContent = decodedHex;
+                
+                const tokenAnalysis = analyzeToken(tokenInput, formatToUse);
+                let analysisHtml = '';
+                
+                analysisHtml += `<div class="analysis-item">
+                    <span class="analysis-label">Format:</span>
+                    <span>${tokenAnalysis.guess || 'Unknown'}</span>
+                </div>`;
+                
+                analysisHtml += `<div class="analysis-item">
+                    <span class="analysis-label">Length:</span>
+                    <span>${tokenAnalysis.length} characters</span>
+                </div>`;
+                
+                analysisHtml += `<div class="analysis-item">
+                    <span class="analysis-label">Unique chars:</span>
+                    <span>${tokenAnalysis.charSet}</span>
+                </div>`;
+                
+                if (tokenAnalysis.commonPatterns.length > 0) {
+                    analysisHtml += `<div class="analysis-item">
+                        <span class="analysis-label">Patterns:</span>
+                        <span>${tokenAnalysis.commonPatterns.join(', ')}</span>
+                    </div>`;
+                }
+                
+                if (tokenAnalysis.decodedLength !== undefined) {
+                    analysisHtml += `<div class="analysis-item">
+                        <span class="analysis-label">Decoded length:</span>
+                        <span>${tokenAnalysis.decodedLength} bytes</span>
+                    </div>`;
+                    
+                    if (tokenAnalysis.isBinary) {
+                        analysisHtml += `<div class="analysis-item">
+                            <span class="analysis-label">Content type:</span>
+                            <span style="color: #d32f2f;">Binary data (likely encrypted)</span>
+                        </div>`;
+                    } else {
+                        analysisHtml += `<div class="analysis-item">
+                            <span class="analysis-label">Content type:</span>
+                            <span style="color: #388e3c;">Text data</span>
+                        </div>`;
+                    }
+                }
+                
+                document.getElementById('analysisContent').innerHTML = analysisHtml;
+                document.getElementById('analysisPanel').style.display = 'block';
+                
+                document.getElementById('originalToken').textContent = tokenInput;
+                document.getElementById('tokenInfo').style.display = 'block';
+                
+                showSuccess('✅ Token decoded successfully! You can now edit and encode back.');
+                
+            } catch (error) {
+                showError(`❌ Error: ${error.message}`);
+            }
+        }
+        
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied to clipboard!');
+            });
+        }
+        
+        function clearAll() {
+            document.getElementById('tokenInput').value = '';
+            document.getElementById('outputText').textContent = 'Text output will appear here...';
+            document.getElementById('outputHex').textContent = 'Hex output will appear here...';
+            document.getElementById('outputRaw').textContent = 'Raw analysis will appear here...';
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+            document.getElementById('analysisPanel').style.display = 'none';
+            document.getElementById('tokenInfo').style.display = 'none';
+            document.getElementById('encodedResult').style.display = 'none';
+            document.getElementById('editControls').style.display = 'none';
+            document.getElementById('detectedFormat').innerHTML = 'Format will be auto-detected...';
+            
+            // Disable editing mode
+            isEditingMode = false;
+            document.getElementById('outputText').contentEditable = false;
+            document.getElementById('outputHex').contentEditable = false;
+            document.getElementById('outputText').classList.remove('editable');
+            document.getElementById('outputHex').classList.remove('editable');
+            
+            setFormat('auto');
+        }
+        
+        function showError(message) {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+        
+        function showSuccess(message) {
+            const successElement = document.getElementById('successMessage');
+            successElement.textContent = message;
+            successElement.style.display = 'block';
+        }
+        
+        // Load your example
+        document.getElementById('tokenInput').value = 'Dmp0XFLI63mwbMH50XIDTKQZa/19+1QFshlQga0ND88eKtY2sIirHfElsblTOBNmGbuZVezdJ9lxXzC7dLpCnvb8soP88rp82l8C364gjxz3K8gDZg8wf9W5UHs1Ssv9G2iA4t/+DBPF6GXDXzGUxqC2kWeznfRtUOb+snGCcAtr2A==';
+        
+        setTimeout(() => {
+            const format = detectFormat(document.getElementById('tokenInput').value);
+            setFormat('auto');
+        }, 100);
+    </script>
+</body>
+</html>
